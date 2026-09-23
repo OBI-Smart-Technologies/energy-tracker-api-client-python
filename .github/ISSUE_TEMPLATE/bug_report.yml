@@ -1,0 +1,45 @@
+name: Bug report
+description: Something in the library does not behave as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the API client. If the problem is with entities, the config flow or the
+        Energy dashboard, report it in the OBI ENERGY TRACKER Home Assistant integration
+        repository instead.
+  - type: input
+    id: version
+    attributes:
+      label: Library version
+      placeholder: 1.0.0
+    validations:
+      required: true
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.14.2"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: The smallest snippet that shows the problem.
+      render: python
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Traceback or log output
+      description: Remove access tokens and personal data before pasting.
+      render: shell
