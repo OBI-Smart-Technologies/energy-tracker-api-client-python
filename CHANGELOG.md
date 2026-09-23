@@ -7,7 +7,7 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
-1.0.0 is not published yet; releasing renames this heading to `## 1.0.0 - YYYY-MM-DD`.
+## 0.1.0 - 2026-09-23
 
 First public release. Extracted from the OBI ENERGY TRACKER Home Assistant integration,
 where this code ran as an in-tree module.

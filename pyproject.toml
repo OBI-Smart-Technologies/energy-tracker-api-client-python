@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "obi-energy-tracker"
-version = "1.0.0"
+version = "0.1.0"
 description = "Async client for the OBI ENERGY TRACKER cloud API"
 readme = "README.md"
 license = "Apache-2.0"
@@ -13,7 +13,7 @@ requires-python = ">=3.13"
 authors = [{ name = "OBI Smart Technologies GmbH" }]
 keywords = ["obi", "energy-tracker", "energy", "smart-home", "asyncio", "aiohttp"]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
+    "Development Status :: 4 - Beta",
     "Framework :: AsyncIO",
     "Intended Audience :: Developers",
     "Operating System :: OS Independent",
