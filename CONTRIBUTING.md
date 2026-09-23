@@ -1,8 +1,8 @@
 # Contributing
 
-Thanks for taking the time to contribute. This library is the API layer of the OBI ENERGY
-TRACKER Home Assistant integration, so a change here can reach every Home Assistant user
-of the integration.
+Thanks for taking the time to contribute. This library is the API layer of the
+[OBI ENERGY TRACKER Home Assistant integration](https://github.com/FabiNaryOBI/ha-obi-energy-tracker),
+so a change here can reach every Home Assistant user of the integration.
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
 
@@ -84,35 +84,3 @@ via `license-files` in `pyproject.toml`.
 4. The workflow builds the distribution, refuses to continue if `vX.Y.Z` is already
    tagged, waits for the `pypi` environment approval, publishes, and then creates the tag
    and the GitHub release.
-
-### One-time PyPI setup
-
-The workflow authenticates with [PyPI Trusted Publishing](https://docs.pypi.org/trusted-publishers/)
-(OpenID Connect), so no API token is stored in the repository. Before the first release,
-add a *pending publisher* for the project `obi-energy-tracker` — on
-[PyPI](https://pypi.org/manage/account/publishing/) and, if the TestPyPI rehearsal is
-wanted, on [TestPyPI](https://test.pypi.org/manage/account/publishing/) as well:
-
-| Field | Value |
-|---|---|
-| Owner | `OBI-Smart-Technologies` |
-| Repository | `energy-tracker-api-client-python` |
-| Workflow | `release.yml` |
-| Environment | `pypi` (on TestPyPI: `testpypi`) |
-
-The GitHub environments `pypi` and `testpypi` already exist and each one only accepts
-deployments from `main`, so a release cannot be published from a side branch even if the
-workflow's own branch check were removed.
-
-What is **not** configured is a four-eyes gate. Required reviewers and the wait timer are
-paid protection rules that this private repository's plan does not offer — the API rejects
-both with `422 Please ensure the billing plan supports the required reviewers protection
-rule`. Until the repository is public or the plan is upgraded, the only gate is therefore
-**write access**: everyone who can start the Release workflow can publish alone. Keep the
-member list down to the maintainers accordingly. Once the repository goes public, add the
-maintainers as required reviewers on the `pypi` environment (Settings → Environments →
-`pypi`) — the publish job then waits for an approval.
-
-Note also that a workflow referencing an environment that does not exist makes GitHub
-create it silently and **without** protection rules, so never delete `pypi` and recreate it
-by running the workflow.
