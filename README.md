@@ -21,7 +21,6 @@ but it has no Home Assistant dependency and can be used on its own.
 | Switch an outlet | `async_set_outlet_state()` |
 | Check bridge firmware | `async_get_bridge_firmware_update()` |
 | Start a bridge firmware update | `async_trigger_bridge_firmware_update()` |
-| Reproduce the OBI app's hourly/daily figures | `hourly_buckets()`, `cumulative()` |
 
 Everything is `async`, typed (`py.typed`) and built on a caller-supplied
 `aiohttp.ClientSession`, so the library never owns a session and never blocks the event
@@ -90,37 +89,25 @@ async def token_provider() -> str:
 api = ObiEnergyTrackerApi(session=session, token_provider=token_provider)
 ```
 
-### Hourly and daily consumption
+### Hourly consumption
 
 Called without a `duration`, `async_get_bridge_measures()` returns the raw meter readings
 of every device of a bridge (cumulative watt-hours, one every 300 seconds) in a single
-request. `aggregation` turns them into the hourly buckets the OBI app shows:
+request. `aggregation` turns them into hourly buckets:
 
 ```python
-from zoneinfo import ZoneInfo
-
 from obi_energy_tracker import Measure, cumulative, hourly_buckets
 
 history = await api.async_get_bridge_measures(bridge.id, [Measure.ENERGY])
 for device in bridge.devices:
     readings = history.get(device.id, {}).get(Measure.ENERGY, [])
-    for bucket, total in cumulative(
-        hourly_buckets(readings, ZoneInfo("Europe/Berlin"))
-    ):
+    for bucket, total in cumulative(hourly_buckets(readings)):
         print(device.display_name, bucket.start, bucket.consumption, total)
 ```
 
 `async_get_meter_readings()` does the same for a single device. Prefer it when a device
 may have no `dataVisibleSince` in the cloud: the multi-device route drops such a device's
 readings, while the per-device route returns them.
-
-Two properties of that arithmetic are deliberate, because it reproduces the **app**, not
-the physical meter:
-
-- Day boundaries come from the time zone you pass in. Pass the zone the meter lives in;
-  with UTC the daily figures will not match the app.
-- The first increment of each local day is skipped, exactly as the app does, so
-  cumulative totals grow roughly 0.5 % slower than the meter's own reading.
 
 ### Errors
 

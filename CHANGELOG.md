@@ -27,5 +27,4 @@ where this code ran as an in-tree module.
 - `TokenProvider` and `static_token_provider` — authentication is awaited before every
   request, so the caller keeps ownership of the OAuth2 session.
 - `connection_strength_from_rssi` — the backend's own RSSI thresholds.
-- `hourly_buckets` and `cumulative` — hourly and cumulative consumption matching the OBI
-  app's arithmetic, including its skipped first increment per local day.
+- `hourly_buckets` and `cumulative` — hourly and cumulative consumption.
