@@ -24,6 +24,7 @@ import aiohttp
 from .auth import TokenProvider
 from .const import (
     CONTENT_TYPE_BRIDGE,
+    CONTENT_TYPE_ENERGY_CONSUMER,
     CONTENT_TYPE_FIRMWARE_UPDATE,
     CONTENT_TYPE_FIRMWARE_UPDATE_REQUEST,
     CONTENT_TYPE_HISTORICAL,
@@ -39,8 +40,21 @@ from .exceptions import (
     ObiEnergyTrackerDeviceOfflineError,
     ObiEnergyTrackerError,
 )
-from .models import Bridge, Device, DeviceMeasures, FirmwareUpdate, MeasureRecord
-from .parser import parse_bridge, parse_device, parse_firmware_update, parse_records
+from .models import (
+    Bridge,
+    Device,
+    DeviceMeasures,
+    EnergyConsumer,
+    FirmwareUpdate,
+    MeasureRecord,
+)
+from .parser import (
+    parse_bridge,
+    parse_device,
+    parse_energy_consumer,
+    parse_firmware_update,
+    parse_records,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -77,6 +91,7 @@ class ObiEnergyTrackerApi:
         accept: str,
         content_type: str | None = None,
         timeout: aiohttp.ClientTimeout = REQUEST_TIMEOUT,
+        missing_ok: bool = False,
         **kwargs: Any,
     ) -> Any:
         url = f"{self._base_url}{path}"
@@ -99,7 +114,7 @@ class ObiEnergyTrackerApi:
                     raise ObiEnergyTrackerDeviceOfflineError(
                         "Device did not respond, it might be offline"
                     )
-                if resp.status == 204:
+                if resp.status == 204 or (missing_ok and resp.status == 404):
                     return None
                 if resp.status != 200:
                     text = await resp.text()
@@ -118,6 +133,15 @@ class ObiEnergyTrackerApi:
         if not isinstance(data, list):
             raise ObiEnergyTrackerError("Unexpected /bridges response")
         return [parse_bridge(item) for item in data if isinstance(item, dict)]
+
+    async def async_get_energy_consumer(self, device_id: str) -> EnergyConsumer | None:
+        data = await self._request(
+            "GET",
+            f"/energy-consumers/{device_id}",
+            accept=CONTENT_TYPE_ENERGY_CONSUMER,
+            missing_ok=True,
+        )
+        return parse_energy_consumer(data)
 
     async def async_set_outlet_state(
         self, outlet_id: str, state: OutletState

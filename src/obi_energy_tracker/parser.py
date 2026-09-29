@@ -29,7 +29,7 @@ from .const import (
     OtaStatus,
     OutletState,
 )
-from .models import Bridge, Device, FirmwareUpdate, MeasureRecord
+from .models import Bridge, Device, EnergyConsumer, FirmwareUpdate, MeasureRecord
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -171,6 +171,21 @@ def parse_firmware_update(raw: Any) -> FirmwareUpdate | None:
         id=update_id,
         version=version,
         change_log=change_log if isinstance(change_log, str) else None,
+    )
+
+
+def _euros(raw: Any) -> float | None:
+    cents = parse_number(raw)
+    return None if cents is None else cents / 100
+
+
+def parse_energy_consumer(raw: Any) -> EnergyConsumer | None:
+    consumer = raw.get("energyConsumer") if isinstance(raw, dict) else None
+    if not isinstance(consumer, dict):
+        return None
+    return EnergyConsumer(
+        kwh_price=_euros(consumer.get("kwhPrice")),
+        feed_in_compensation=_euros(consumer.get("feedinCompensation")),
     )
 
 

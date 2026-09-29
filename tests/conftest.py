@@ -192,6 +192,21 @@ def make_firmware_update_api_response(
     }
 
 
+def make_energy_consumer_api_response(
+    type: str = "household",
+    kwh_price: float | str | None = 32.45,
+    feedin_compensation: object = 7.23,
+) -> dict[str, Any]:
+    return {
+        "id": "consumer-001",
+        "energyConsumer": {
+            "type": type,
+            "kwhPrice": kwh_price,
+            "feedinCompensation": feedin_compensation,
+        },
+    }
+
+
 def make_record_api_response(
     time: str = "2026-01-01T12:00:00Z",
     value: float = 1234.5,

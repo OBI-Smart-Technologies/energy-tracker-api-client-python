@@ -68,6 +68,26 @@ def hourly_buckets(records: list[MeasureRecord]) -> list[HourlyBucket]:
     ]
 
 
+def energy_cost(energy: float, price: float) -> float:
+    return energy * price / 1000
+
+
+def hourly_costs(
+    buckets: list[tuple[HourlyBucket, float]], price: float
+) -> list[tuple[HourlyBucket, float]]:
+    return [
+        (
+            HourlyBucket(
+                start=bucket.start,
+                consumption=energy_cost(bucket.consumption, price),
+                meter=energy_cost(bucket.meter, price),
+            ),
+            energy_cost(total, price),
+        )
+        for bucket, total in buckets
+    ]
+
+
 def cumulative(buckets: list[HourlyBucket]) -> list[tuple[HourlyBucket, float]]:
     total = 0.0
     result: list[tuple[HourlyBucket, float]] = []

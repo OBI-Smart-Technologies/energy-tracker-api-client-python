@@ -44,6 +44,12 @@ class Device:
 
 
 @dataclass
+class EnergyConsumer:
+    kwh_price: float | None = None
+    feed_in_compensation: float | None = None
+
+
+@dataclass
 class FirmwareUpdate:
     id: str
     version: str

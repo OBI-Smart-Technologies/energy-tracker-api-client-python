@@ -14,7 +14,14 @@
 
 from __future__ import annotations
 
-from .aggregation import HourlyBucket, cumulative, hourly_buckets, to_series
+from .aggregation import (
+    HourlyBucket,
+    cumulative,
+    energy_cost,
+    hourly_buckets,
+    hourly_costs,
+    to_series,
+)
 from .auth import TokenProvider, static_token_provider
 from .client import ObiEnergyTrackerApi
 from .const import (
@@ -31,7 +38,14 @@ from .exceptions import (
     ObiEnergyTrackerDeviceOfflineError,
     ObiEnergyTrackerError,
 )
-from .models import Bridge, Device, DeviceMeasures, FirmwareUpdate, MeasureRecord
+from .models import (
+    Bridge,
+    Device,
+    DeviceMeasures,
+    EnergyConsumer,
+    FirmwareUpdate,
+    MeasureRecord,
+)
 from .parser import connection_strength_from_rssi
 
 __all__ = [
@@ -42,6 +56,7 @@ __all__ = [
     "Device",
     "DeviceKind",
     "DeviceMeasures",
+    "EnergyConsumer",
     "FirmwareUpdate",
     "HourlyBucket",
     "Measure",
@@ -55,7 +70,9 @@ __all__ = [
     "TokenProvider",
     "connection_strength_from_rssi",
     "cumulative",
+    "energy_cost",
     "hourly_buckets",
+    "hourly_costs",
     "static_token_provider",
     "to_series",
 ]
