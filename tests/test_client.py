@@ -7,6 +7,7 @@ from obi_energy_tracker import (
     DEFAULT_BASE_URL,
     Bridge,
     Device,
+    EnergyConsumer,
     FirmwareUpdate,
     Measure,
     ObiEnergyTrackerApi,
@@ -20,6 +21,7 @@ from obi_energy_tracker import (
 from obi_energy_tracker.client import HISTORY_TIMEOUT, REQUEST_TIMEOUT
 from obi_energy_tracker.const import (
     CONTENT_TYPE_BRIDGE,
+    CONTENT_TYPE_ENERGY_CONSUMER,
     CONTENT_TYPE_FIRMWARE_UPDATE,
     CONTENT_TYPE_FIRMWARE_UPDATE_REQUEST,
     CONTENT_TYPE_HISTORICAL,
@@ -32,6 +34,7 @@ from .conftest import (
     FakeBackend,
     failing_session,
     make_bridge_api_response,
+    make_energy_consumer_api_response,
     make_firmware_update_api_response,
     make_measures_api_response,
     make_outlet_api_response,
@@ -838,6 +841,91 @@ class TestGetBridgeFirmwareUpdate:
         backend.respond(payload=payload)
 
         assert await api.async_get_bridge_firmware_update("br-1") is None
+
+
+class TestGetEnergyConsumer:
+    async def test_prices_are_parsed_in_euros(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend
+    ) -> None:
+        backend.respond(payload=make_energy_consumer_api_response())
+
+        consumer = await api.async_get_energy_consumer("sensor-001")
+
+        assert consumer == EnergyConsumer(kwh_price=0.3245, feed_in_compensation=0.0723)
+
+    async def test_endpoint_and_accept_header(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend
+    ) -> None:
+        backend.respond(payload=make_energy_consumer_api_response())
+
+        await api.async_get_energy_consumer("sensor-001")
+
+        request = backend.requests[0]
+
+        assert request.method == "GET"
+        assert request.path == "/energy-consumers/sensor-001"
+        assert request.headers["Accept"] == CONTENT_TYPE_ENERGY_CONSUMER
+
+    async def test_numeric_strings_are_accepted(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend
+    ) -> None:
+        backend.respond(
+            payload=make_energy_consumer_api_response(
+                kwh_price="40.00", feedin_compensation="7.5"
+            )
+        )
+
+        consumer = await api.async_get_energy_consumer("sensor-001")
+
+        assert consumer == EnergyConsumer(kwh_price=0.4, feed_in_compensation=0.075)
+
+    @pytest.mark.parametrize(
+        ("kwh_price", "feedin_compensation", "expected"),
+        [
+            (None, None, EnergyConsumer()),
+            (32.45, None, EnergyConsumer(kwh_price=0.3245)),
+            ("n/a", True, EnergyConsumer()),
+        ],
+    )
+    async def test_missing_prices_are_none(
+        self,
+        api: ObiEnergyTrackerApi,
+        backend: FakeBackend,
+        kwh_price: float | str | None,
+        feedin_compensation: object,
+        expected: EnergyConsumer,
+    ) -> None:
+        backend.respond(
+            payload=make_energy_consumer_api_response(
+                kwh_price=kwh_price,
+                feedin_compensation=feedin_compensation,
+            )
+        )
+
+        assert await api.async_get_energy_consumer("sensor-001") == expected
+
+    async def test_404_means_no_energy_consumer(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend
+    ) -> None:
+        backend.respond(status=404, body="No energy consumer associated with device!")
+
+        assert await api.async_get_energy_consumer("sensor-001") is None
+
+    @pytest.mark.parametrize("payload", [{}, {"energyConsumer": None}, []])
+    async def test_unusable_payload_returns_none(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend, payload: object
+    ) -> None:
+        backend.respond(payload=payload)
+
+        assert await api.async_get_energy_consumer("sensor-001") is None
+
+    async def test_404_stays_an_error_elsewhere(
+        self, api: ObiEnergyTrackerApi, backend: FakeBackend
+    ) -> None:
+        backend.respond(status=404, body="not found")
+
+        with pytest.raises(ObiEnergyTrackerError):
+            await api.async_get_bridge_firmware_update("br-1")
 
 
 class TestTriggerBridgeFirmwareUpdate:

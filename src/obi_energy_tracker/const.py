@@ -23,6 +23,7 @@ UNKNOWN_VERSION = "unknown"
 _VND = "application/vnd.obi.companion.energy-tracking"
 
 CONTENT_TYPE_BRIDGE = f"{_VND}.bridge.v2+json"
+CONTENT_TYPE_ENERGY_CONSUMER = f"{_VND}.energy-consumer.v1+json"
 CONTENT_TYPE_OUTLET = f"{_VND}.outlet.v1+json"
 CONTENT_TYPE_HISTORICAL = f"{_VND}.historical-record.v1+json"
 CONTENT_TYPE_HISTORICAL_MULTI = f"{_VND}.historical-record.v2+json"

@@ -7,6 +7,17 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## 0.2.0 - 2026-09-29
+
+### Added
+
+- `async_get_energy_consumer()` reads the energy consumer of a sensor or outlet. The new
+  `EnergyConsumer` model carries its `kwh_price` and `feed_in_compensation` in euros per
+  kWh (the cloud stores euro cents), or `None` when a price is not set. A device without
+  an energy consumer returns `None` instead of raising.
+- `hourly_costs()` prices the output of `cumulative()` with a price per kWh, and
+  `energy_cost()` prices a single watt-hour value.
+
 ## 0.1.0 - 2026-09-23
 
 First public release. Extracted from the OBI ENERGY TRACKER Home Assistant integration,

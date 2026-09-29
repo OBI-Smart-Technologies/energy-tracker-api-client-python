@@ -3,9 +3,14 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
+import pytest
+
 from obi_energy_tracker.aggregation import (
+    HourlyBucket,
     cumulative,
+    energy_cost,
     hourly_buckets,
+    hourly_costs,
     to_series,
 )
 from obi_energy_tracker.const import Measure
@@ -218,3 +223,33 @@ class TestToSeries:
         ]
 
         assert to_series(records)[0][0].tzinfo is UTC
+
+
+class TestEnergyCost:
+    def test_watt_hours_are_priced_per_kilowatt_hour(self) -> None:
+        assert energy_cost(500.0, 0.4) == 0.2
+
+
+class TestHourlyCosts:
+    def test_buckets_and_totals_are_priced(self) -> None:
+        start = _time("2026-08-24 10:00:00")
+        bucket = HourlyBucket(start=start, consumption=500.0, meter=4000.0)
+
+        assert hourly_costs([(bucket, 1500.0)], 0.4) == [
+            (HourlyBucket(start=start, consumption=0.2, meter=1.6), 0.6)
+        ]
+
+    def test_prices_the_cumulative_series(self) -> None:
+        totals = cumulative(hourly_buckets(_records(BOUNDARY_24_08)))
+
+        costs = hourly_costs(totals, 0.3)
+
+        assert [bucket.start for bucket, _ in costs] == [
+            bucket.start for bucket, _ in totals
+        ]
+        assert [total for _, total in costs] == pytest.approx(
+            [total * 0.3 / 1000 for _, total in totals]
+        )
+
+    def test_empty(self) -> None:
+        assert hourly_costs([], 0.3) == []

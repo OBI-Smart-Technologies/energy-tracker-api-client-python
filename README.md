@@ -18,6 +18,7 @@ but it has no Home Assistant dependency and can be used on its own.
 | Read recent measurements | `async_get_bridge_measures()` — energy, feed-in, RSSI, battery per device |
 | Read the full history of every device | `async_get_bridge_measures()` without `duration` |
 | Read the full meter history of one device | `async_get_meter_readings()` — every reading the cloud has kept |
+| Read the prices of a device | `async_get_energy_consumer()` — price per kWh and feed-in compensation in euros |
 | Switch an outlet | `async_set_outlet_state()` |
 | Check bridge firmware | `async_get_bridge_firmware_update()` |
 | Start a bridge firmware update | `async_trigger_bridge_firmware_update()` |
@@ -104,6 +105,19 @@ for device in bridge.devices:
     for bucket, total in cumulative(hourly_buckets(readings)):
         print(device.display_name, bucket.start, bucket.consumption, total)
 ```
+
+`hourly_costs()` prices the output of `cumulative()` with a price per kWh, for example the
+`kwh_price` of `async_get_energy_consumer()`. Buckets and running totals come back in the
+price's currency, and `energy_cost()` prices a single watt-hour value the same way:
+
+```python
+consumer = await api.async_get_energy_consumer(device.id)
+if consumer is not None and consumer.kwh_price is not None:
+    costs = hourly_costs(cumulative(hourly_buckets(readings)), consumer.kwh_price)
+```
+
+`async_get_energy_consumer()` returns `None` when no energy consumer is set up for the
+device, and a price is `None` when it is not set in the OBI app.
 
 `async_get_meter_readings()` does the same for a single device. Prefer it when a device
 may have no `dataVisibleSince` in the cloud: the multi-device route drops such a device's
