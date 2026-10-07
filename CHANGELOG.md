@@ -7,6 +7,13 @@ project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## 1.0.0 - 2026-10-07
+
+### Changed
+
+- First stable release. The public API is unchanged since 0.2.0 and from now on follows
+  Semantic Versioning strictly.
+
 ## 0.2.0 - 2026-09-29
 
 ### Added
